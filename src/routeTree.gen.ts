@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as ApiAnalyzeRouteImport } from './routes/api.analyze'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
 import { Route as DashboardAdvisorRouteImport } from './routes/dashboard.advisor'
 import { Route as DashboardAnalyticsRouteImport } from './routes/dashboard.analytics'
@@ -40,6 +41,11 @@ const DashboardRoute = DashboardRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAnalyzeRoute = ApiAnalyzeRouteImport.update({
+  id: '/api/analyze',
+  path: '/api/analyze',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
@@ -117,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/analyze': typeof ApiAnalyzeRoute
   '/dashboard/advisor': typeof DashboardAdvisorRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
   '/dashboard/correlation': typeof DashboardCorrelationRoute
@@ -135,6 +142,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/analyze': typeof ApiAnalyzeRoute
   '/dashboard/advisor': typeof DashboardAdvisorRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
   '/dashboard/correlation': typeof DashboardCorrelationRoute
@@ -155,6 +163,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/analyze': typeof ApiAnalyzeRoute
   '/dashboard/advisor': typeof DashboardAdvisorRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
   '/dashboard/correlation': typeof DashboardCorrelationRoute
@@ -176,6 +185,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/sitemap.xml'
+    | '/api/analyze'
     | '/dashboard/advisor'
     | '/dashboard/analytics'
     | '/dashboard/correlation'
@@ -194,6 +204,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/sitemap.xml'
+    | '/api/analyze'
     | '/dashboard/advisor'
     | '/dashboard/analytics'
     | '/dashboard/correlation'
@@ -213,6 +224,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/sitemap.xml'
+    | '/api/analyze'
     | '/dashboard/advisor'
     | '/dashboard/analytics'
     | '/dashboard/correlation'
@@ -233,6 +245,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ApiAnalyzeRoute: typeof ApiAnalyzeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -256,6 +269,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/analyze': {
+      id: '/api/analyze'
+      path: '/api/analyze'
+      fullPath: '/api/analyze'
+      preLoaderRoute: typeof ApiAnalyzeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard/': {
@@ -401,6 +421,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ApiAnalyzeRoute: ApiAnalyzeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
