@@ -6,7 +6,6 @@ export const Route = createFileRoute("/api/analyze")({
     handlers: {
       POST: async ({ request }) => {
         try {
-          // Load the private environment variables
           const { config } = await import("dotenv");
           config({ path: ".env.local" });
 
@@ -38,37 +37,74 @@ export const Route = createFileRoute("/api/analyze")({
 
           const ai = new GoogleGenAI({ apiKey });
 
-          const response = await ai.models.generateContent({
-            model: "gemini-3.5-flash-lite",
-            contents: `
-              You are Sentinel AI, a cybersecurity threat analysis assistant.
+          const prompt = `
+            You are Sentinel AI, a cybersecurity threat analysis assistant.
 
-              Analyse the following user-provided message or threat description.
+            Analyse the following user-provided message or threat description.
 
-              Provide:
-              1. Threat category
-              2. Severity: Low, Medium, High, or Critical
-              3. Suspicious indicators
-              4. Explanation of the potential risk
-              5. Recommended protective actions
+            Provide:
+            1. Threat category
+            2. Severity: Low, Medium, High, or Critical
+            3. Suspicious indicators
+            4. Explanation of the potential risk
+            5. Recommended protective actions
 
-              Be accurate and cautious. Do not claim that a threat
-              is confirmed when the available information is insufficient.
+            Be accurate and cautious. Do not claim that a threat
+            is confirmed when the available information is insufficient.
 
-              Threat details:
-              ${text}
-            `,
-          });
+            Threat details:
+            ${text}
+          `;
+
+          let response;
+          let lastError;
+
+          for (let attempt = 1; attempt <= 3; attempt++) {
+            try {
+              response = await ai.models.generateContent({
+                model: "gemini-3.5-flash-lite",
+                contents: prompt,
+              });
+
+              break;
+            } catch (error) {
+              lastError = error;
+
+              const status = Number(
+                (error as { status?: number })?.status
+              );
+
+              const retryable =
+                status === 429 ||
+                status === 503 ||
+                (status >= 500 && status <= 599);
+
+              if (!retryable || attempt === 3) {
+                throw error;
+              }
+
+              await new Promise((resolve) =>
+                setTimeout(resolve, attempt * 1500)
+              );
+            }
+          }
+
+          if (!response) {
+            throw lastError || new Error("Analysis failed.");
+          }
 
           return Response.json({
             analysis: response.text || "No analysis was generated.",
           });
+
         } catch (error) {
           console.error("Gemini analysis error:", error);
 
           return Response.json(
-            { error: "Threat analysis is temporarily unavailable." },
-            { status: 500 },
+            {
+              error: "Threat analysis is temporarily unavailable. Please try again shortly.",
+            },
+            { status: 503 },
           );
         }
       },
