@@ -31,7 +31,7 @@ export const dnaSummary: DnaSummary[] = [
 ];
 
 export const digitalIdentity = {
-  customer: "Shivam Gupta",
+  customer: "Neha Gupta",
   customerId: "CID-204781",
   relationshipSince: "2023",
   trustedDevices: 4,
